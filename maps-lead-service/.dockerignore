@@ -1,0 +1,8 @@
+.git
+node_modules
+.env
+.env.docker
+.DS_Store
+drizzle
+coverage
+.dist
