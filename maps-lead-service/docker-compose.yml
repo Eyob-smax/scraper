@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: maps_lead_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maps_user
+      POSTGRES_PASSWORD: maps_password
+      POSTGRES_DB: maps_leads
+    ports:
+      - "5432:5432"
+    volumes:
+      - maps_lead_pg_data:/var/lib/postgresql/data
+
+volumes:
+  maps_lead_pg_data:
+  
