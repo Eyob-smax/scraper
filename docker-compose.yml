@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: maps_lead_api
+    container_name: scraper_api
     restart: unless-stopped
     env_file:
       - .env.docker
@@ -12,17 +12,16 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: maps_lead_postgres
+    container_name: scraper_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: maps_user
-      POSTGRES_PASSWORD: maps_password
-      POSTGRES_DB: maps_leads
+      POSTGRES_USER: scraper_user
+      POSTGRES_PASSWORD: scraper_password
+      POSTGRES_DB: scraper_db
     ports:
       - "5432:5432"
     volumes:
-      - maps_lead_pg_data:/var/lib/postgresql/data
+      - scraper_pg_data:/var/lib/postgresql/data
 
 volumes:
-  maps_lead_pg_data:
-  
+  scraper_pg_data:

@@ -37,12 +37,12 @@ Bun.serve({
     if (url.pathname === "/health" && request.method === "GET") {
       return jsonResponse({
         ok: true,
-        service: "maps-lead-service",
+        service: "lead-scraper",
       });
     }
 
     if (
-      url.pathname === "/v1/scrape/google-places" &&
+      url.pathname === "/v1/scrape/places" &&
       request.method === "POST"
     ) {
       const authHeader = request.headers.get("authorization");
@@ -111,4 +111,4 @@ Bun.serve({
   },
 });
 
-console.log(`maps-lead-service running on http://localhost:${env.PORT}`);
+console.log(`lead-scraper running on http://localhost:${env.PORT}`);
