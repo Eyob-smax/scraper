@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { businesses, searchJobs } from "../db/schema";
-import { searchGooglePlacesText } from "../providers/google-places";
+import { searchGooglePlaces } from "../providers/google-places";
 
 export type ScrapeBusinessesInput = {
   query: string;
+  location?: string;
   limit: number;
 };
 
@@ -19,29 +20,34 @@ export async function scrapeBusinesses(input: ScrapeBusinessesInput) {
   });
 
   try {
-    const places = await searchGooglePlacesText({
+    const places = await searchGooglePlaces({
       query: input.query,
+      location: input.location,
       limit: input.limit,
     });
 
     const placesWithWebsite = places.filter((place) =>
-      Boolean(place.websiteUri),
+      Boolean(place.website),
     );
 
     const rows = placesWithWebsite.map((place) => ({
       id: crypto.randomUUID(),
       jobId,
-      googlePlaceId: place.id ?? crypto.randomUUID(),
+      googlePlaceId: place.placeId ?? crypto.randomUUID(),
 
-      name: place.displayName?.text ?? null,
-      websiteUrl: place.websiteUri ?? null,
-      phone: place.internationalPhoneNumber ?? null,
-      address: place.formattedAddress ?? null,
-      googleMapsUrl: place.googleMapsUri ?? null,
+      name: place.name ?? null,
+      websiteUrl: place.website ?? null,
+      phone: place.phone ?? null,
+      address: place.address ?? null,
+      googleMapsUrl: place.url ?? null,
 
       rating: place.rating == null ? null : String(place.rating),
-      reviewCount: place.userRatingCount ?? null,
-      businessStatus: place.businessStatus ?? null,
+      reviewCount: place.reviewCount ?? null,
+      businessStatus: place.permanentlyClosed
+        ? "CLOSED_PERMANENTLY"
+        : place.temporarilyClosed
+          ? "CLOSED_TEMPORARILY"
+          : "OPERATIONAL",
 
       raw: place,
 

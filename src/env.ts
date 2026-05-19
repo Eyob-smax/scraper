@@ -11,6 +11,6 @@ function requireEnv(name: string): string {
 export const env = {
   PORT: Number(Bun.env.PORT ?? 3000),
   DATABASE_URL: requireEnv("DATABASE_URL"),
-  GOOGLE_PLACES_API_KEY: requireEnv("GOOGLE_PLACES_API_KEY"),
+  APIFY_API_TOKEN: requireEnv("APIFY_API_TOKEN"),
   SERVICE_API_KEY: requireEnv("SERVICE_API_KEY"),
 };

@@ -9,6 +9,7 @@
     "db:studio": "bunx drizzle-kit studio"
   },
   "dependencies": {
+    "apify-client": "^2.23.3",
     "dotenv": "latest",
     "drizzle-orm": "latest"
   },

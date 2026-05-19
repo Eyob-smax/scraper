@@ -62,6 +62,7 @@ Bun.serve({
 
       const payload = body as {
         query?: unknown;
+        location?: unknown;
         limit?: unknown;
       };
 
@@ -72,14 +73,20 @@ Bun.serve({
         return badRequest("query must be a string with at least 3 characters");
       }
 
+      const location =
+        typeof payload.location === "string"
+          ? payload.location.trim() || undefined
+          : undefined;
+
       const limit =
         typeof payload.limit === "number" && Number.isFinite(payload.limit)
-          ? Math.min(Math.max(Math.floor(payload.limit), 1), 20)
+          ? Math.min(Math.max(Math.floor(payload.limit), 1), 50)
           : 20;
 
       try {
         const result = await scrapeBusinesses({
           query: payload.query.trim(),
+          location,
           limit,
         });
 

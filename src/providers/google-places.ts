@@ -1,63 +1,62 @@
+import { ApifyClient } from "apify-client";
 import { env } from "../env";
 
-const GOOGLE_TEXT_SEARCH_URL =
-  "https://places.googleapis.com/v1/places:searchText";
+const client = new ApifyClient({
+  token: env.APIFY_API_TOKEN,
+});
 
-const FIELD_MASK = [
-  "places.id",
-  "places.displayName",
-  "places.formattedAddress",
-  "places.websiteUri",
-  "places.internationalPhoneNumber",
-  "places.googleMapsUri",
-  "places.rating",
-  "places.userRatingCount",
-  "places.businessStatus",
-].join(",");
+const ACTOR_ID = "compass/crawler-google-places";
 
-export type GooglePlaceResult = {
-  id?: string;
-  displayName?: {
-    text?: string;
-    languageCode?: string;
-  };
-  formattedAddress?: string;
-  websiteUri?: string;
-  internationalPhoneNumber?: string;
-  googleMapsUri?: string;
+export type ApifyPlaceResult = {
+  placeId?: string;
+  name?: string;
+  address?: string;
+  website?: string;
+  phone?: string;
+  url?: string; // Google Maps URL
   rating?: number;
-  userRatingCount?: number;
-  businessStatus?: string;
+  reviewCount?: number;
+  permanentlyClosed?: boolean;
+  temporarilyClosed?: boolean;
+  categoryMain?: string;
+  categories?: string[];
+  city?: string;
+  postalCode?: string;
+  state?: string;
+  countryCode?: string;
+  location?: {
+    lat?: number;
+    lng?: number;
+  };
 };
 
-export async function searchGooglePlacesText(params: {
+export async function searchGooglePlaces(params: {
   query: string;
+  location?: string;
   limit: number;
-}): Promise<GooglePlaceResult[]> {
-  const pageSize = Math.min(Math.max(params.limit, 1), 20);
-
-  const response = await fetch(GOOGLE_TEXT_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": env.GOOGLE_PLACES_API_KEY,
-      "X-Goog-FieldMask": FIELD_MASK,
+}): Promise<ApifyPlaceResult[]> {
+  const input = {
+    searchStringsArray: [params.query],
+    locationQuery: params.location ?? "",
+    maxCrawledPlacesPerSearch: params.limit,
+    language: "en",
+    scrapeSocialMediaProfiles: {
+      facebooks: false,
+      instagrams: false,
+      youtubes: false,
+      tiktoks: false,
+      twitters: false,
     },
-    body: JSON.stringify({
-      textQuery: params.query,
-      pageSize,
-    }),
-  });
+    maximumLeadsEnrichmentRecords: 0,
+  };
 
-  if (!response.ok) {
-    const errorText = await response.text();
+  const run = await client
+    .actor(ACTOR_ID)
+    .call(input);
 
-    throw new Error(
-      `Google Places request failed with status ${response.status}: ${errorText}`,
-    );
-  }
+  const { items } = await client
+    .dataset(run.defaultDatasetId)
+    .listItems();
 
-  const data = await response.json();
-
-  return data.places ?? [];
+  return items as ApifyPlaceResult[];
 }
